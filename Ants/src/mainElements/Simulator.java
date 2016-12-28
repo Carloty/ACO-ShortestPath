@@ -15,9 +15,9 @@ import map.Path;
 import map.Position;
 
 public class Simulator extends Observable {
-	public static int radius = 15; // TODO check value
+	public static int radius = 12; // TODO check value
 	
-	private static int iterations = 60;
+	private static int iterations;
 	
 	private static double p = 0.4; // TODO Check value
 	
@@ -47,6 +47,9 @@ public class Simulator extends Observable {
 		createColony();
 	}
 	
+	/**
+	 * Add the correct number of ants in the colony.
+	 */
 	private void createColony() {
 		colony = new ArrayList<>();
 		for(int i = 0; i < numberOfAnts; i++){
@@ -96,7 +99,7 @@ public class Simulator extends Observable {
 	    notifyObservers(node);
 	}
 	
-	public void vider() {
+	public void reset() {
 	    start = null;
 	    end = null;
 	    otherNodes.clear();
@@ -111,6 +114,10 @@ public class Simulator extends Observable {
 	public void linkNodes(int xParent, int yParent, int xChild, int yChild){
 		Node parent = findClosestNode(xParent, yParent, 1.5*radius);
 		Node child = findClosestNode(xChild, yChild, 1.5*radius);
+		linkNodes(parent, child);
+	}
+	
+	private void linkNodes(Node parent, Node child){
 		if(parent != null && child != null && !isExistingPath(parent, child)){
 			parent.addChild(child);
 			paths.add(parent.getAvailablePaths().get(parent.getAvailablePaths().size()-1));
@@ -196,6 +203,7 @@ public class Simulator extends Observable {
 					proba = path.getProbability();
 				}
 			}
+			System.out.println(proba);
 			shortestPath.add(likeliestPath);
 			currentNode = likeliestPath.getFinalNode();
 		}
@@ -203,82 +211,6 @@ public class Simulator extends Observable {
 		setChanged();
 	    notifyObservers();
 	}
-
-//	public static void main(String[] args) {
-//		
-//		// Create Nodes
-//		start = new Node(0.0, 0.0);
-//		Node node1 = new Node(10.0,0.0);
-//		Node node2 = new Node(5.0,5.0);
-//		end = new Node(10.0,10.0);
-//		
-//		// Link nodes
-//		start.addChild(node1);
-//		start.addChild(node2);
-//		node1.addChild(end);
-//		node1.addChild(node2);
-//		node2.addChild(end);
-//		node2.addChild(node1);
-//		
-//		// Create colony at start position
-//		for(int i=0;i<numberOfAnts; i++){
-//			colony.add(new Ant(start));
-//		}
-//		
-//
-//		// TO debug
-//		List<Ant> colonyDebug = colony;
-//		Node startDebug = start;
-//		Node endDebug = end;
-//		
-//		
-//		// Iterate TODO
-//		for(int i = 0; i < iterations; i++){
-//			// All ants making their way to the end node (target point)
-//			HashSet<Ant> antsAtTarget = new HashSet<>();
-//			while(antsAtTarget.size()!=colony.size()){
-//				for(Ant ant : colony){
-//					if(!ant.getCurrentNode().equals(end)){
-//						Node currentNode = ant.getCurrentNode();
-//						Path selectedPath = selectPathRandomly(currentNode.getAvailablePaths());
-//						ant.setNodePosition(selectedPath.getFinalNode());
-//						ant.addAVisitedPath(selectedPath);
-//					} else {
-//						antsAtTarget.add(ant);
-//					}
-//				}
-//			}
-//			
-//			// Update pheromone
-//			HashMap<Path, Double> pheromonePerPath = new HashMap<>();
-//			double smallestDistance = Double.MAX_VALUE;
-//			Ant fastestAnt = null;
-//			for(Ant ant : colony){
-//				double distance = ant.getTraveledDistance();
-//				if(distance < smallestDistance){
-//					fastestAnt = ant;
-//					smallestDistance = distance;
-//				}
-//				for(Path path : ant.getVisitedPaths()){
-//					if(pheromonePerPath.containsKey(path)){
-//						pheromonePerPath.put(path, pheromonePerPath.get(path)+1.0/distance);
-//					} else {
-//						pheromonePerPath.put(path, 1.0/distance);
-//					}
-//				}
-//			}
-//			// Double update of pheromone on the path of the fastest ant
-//			for(Path path : fastestAnt.getVisitedPaths()){
-//				pheromonePerPath.put(path, pheromonePerPath.get(path)+1.0/smallestDistance);
-//			}
-//			
-//			updatePheromone(start, pheromonePerPath, new HashSet<>());
-//			normalizeAllProba(start, new HashSet<Node>());
-//			
-//			allAntsComingBackToColony();
-//			
-//		}
-//	}
 
 	private static void normalizeAllProba(Node currentNode, HashSet<Node> alreadyVisitedNodes) {
 		if(!alreadyVisitedNodes.contains(currentNode)){
@@ -369,5 +301,15 @@ public class Simulator extends Observable {
 	
 	private int adaptPosition(int position){
 		return Math.max(0, position-(Simulator.radius/2));
+	}
+
+	public void linkAllNodes() {
+		for(Node nodeI : otherNodes){
+			for(Node nodeF : otherNodes){
+				if(nodeI != nodeF){
+					linkNodes(nodeI, nodeF);
+				}
+			}
+		}
 	}
 }

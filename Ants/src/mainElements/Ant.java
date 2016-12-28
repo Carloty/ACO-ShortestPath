@@ -5,15 +5,29 @@ import java.util.List;
 import map.Node;
 import map.Path;
 
-public class Ant {	
+/**
+ * Class representing an Ant.
+ */
+public class Ant {
+	
+	/**
+	 * Current node where the ant is.
+	 */
 	private Node nodePosition;
 	
+	/**
+	 * Paths previously visited by the ant.
+	 */
 	private List<Path> visitedPaths;
 	
 	public Ant(){
 		this(null);
 	}
 	
+	/**
+	 * Create ant at the specified node.
+	 * @param position Current node where the ant is.
+	 */
 	public Ant(Node position){
 		super();
 		setNodePosition(position);
@@ -44,11 +58,19 @@ public class Ant {
 		return visitedPaths;
 	}
 	
+	/**
+	 * Set the specified node as the current position of the ant
+	 * and reset the visited paths.
+	 * @param colonyPosition Node where the colony is supposed to be.
+	 */
 	public void backToColony(Node colonyPosition){
 		setNodePosition(nodePosition);
 		visitedPaths.clear();
 	}
 	
+	/**
+	 * Get the distance travaled by the ant.
+	 */
 	public double getTraveledDistance(){
 		double distance = 0.0;
 		for(Path path : visitedPaths){

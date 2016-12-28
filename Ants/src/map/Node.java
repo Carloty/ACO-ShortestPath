@@ -2,12 +2,18 @@ package map;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Intersection of paths.
+ */
 public class Node {
 	
 	private Position nodePosition;
 	
 	private List<Node> parents;
 	
+	/**
+	 * Paths aiming at this node's children.
+	 */
 	private List<Path> children;
 	
 	public Node(){
