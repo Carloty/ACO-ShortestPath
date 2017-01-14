@@ -34,6 +34,8 @@ public class Simulator extends Observable {
 	
 	ArrayList<Path> shortestPath = new ArrayList<Path>();
 	
+	private Path realShortestPath;
+	
 	private Ant currentAnt = null;
 	
 	private int currentIteration = -1;
@@ -140,19 +142,26 @@ public class Simulator extends Observable {
 	public void linkNodes(int xParent, int yParent, int xChild, int yChild){
 		Node parent = findClosestNode(xParent, yParent, 1.5*radius);
 		Node child = findClosestNode(xChild, yChild, 1.5*radius);
-		linkNodes(parent, child);
+		Path createdPath = linkNodes(parent, child);
+		if(createdPath != null && createdPath.getInitialNode().equals(start) && createdPath.getFinalNode().equals(end)){
+			realShortestPath = createdPath;
+		}
 	}
 	
 	/**
 	 * Create the path between the specified initial and final node
 	 */
-	private void linkNodes(Node initial, Node child){
+	private Path linkNodes(Node initial, Node child){
+		Path newPath = null;
 		if(initial != null && child != null && !isExistingPath(initial, child)){
 			initial.addChild(child);
-			paths.add(initial.getAvailablePaths().get(initial.getAvailablePaths().size()-1));
+			newPath = initial.getAvailablePaths().get(initial.getAvailablePaths().size()-1);
+			paths.add(newPath);
 		}
 		setChanged();
 	    notifyObservers();
+	    
+	    return newPath;
 	}
 	
 	/**
@@ -379,6 +388,11 @@ public class Simulator extends Observable {
 			}
 		}
 		
+		if(realShortestPath != null){
+			gc.setColor(Color.BLACK);
+			gc.drawString("Probabilité actuelle du chemin direct : "+realShortestPath.getProbability(), 5, 30);
+		}
+		
 		if(!shortestPath.isEmpty()) {
 			gc.setColor(Color.MAGENTA);
 			for(Path path : shortestPath){
@@ -386,7 +400,7 @@ public class Simulator extends Observable {
 				Node f = path.getFinalNode();
 				gc.drawLine(i.getXPosition(), i.getYPosition(), f.getXPosition(), f.getYPosition());
 			}
-			gc.drawString("Probabilité du plus court chemin trouvé : "+shortestPath.get(0).getProbability(), 5, 30);
+			gc.drawString("Probabilité du plus court chemin trouvé : "+shortestPath.get(0).getProbability(), 5, 45);
 		}
 	}
 	
@@ -404,7 +418,10 @@ public class Simulator extends Observable {
 		for(Node nodeI : otherNodes){
 			for(Node nodeF : otherNodes){
 				if(nodeI != nodeF){
-					linkNodes(nodeI, nodeF);
+					Path newPath = linkNodes(nodeI, nodeF);
+					if(newPath != null && newPath.getInitialNode().equals(start) && newPath.getFinalNode().equals(end)){
+						realShortestPath = newPath;
+					}
 				}
 			}
 		}
