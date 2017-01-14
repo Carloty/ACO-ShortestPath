@@ -9,7 +9,7 @@ import mainElements.Simulator;
 import java.awt.*;
 
 /**
- * Main class.
+ * Main class
  */
 public class Software {
 

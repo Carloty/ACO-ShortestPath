@@ -7,6 +7,7 @@ import mainElements.Simulator;
 import java.awt.*;
 import java.util.*;
 
+@SuppressWarnings("serial")
 public class DisplayZone extends JPanel implements Observer {
 	private static final int xSize = 1000;
 	private static final int ySize = 600;

@@ -64,7 +64,7 @@ public class Ant {
 	 * @param colonyPosition Node where the colony is supposed to be.
 	 */
 	public void backToColony(Node colonyPosition){
-		setNodePosition(nodePosition);
+		setNodePosition(colonyPosition);
 		visitedPaths.clear();
 	}
 	

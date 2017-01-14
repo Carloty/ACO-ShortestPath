@@ -7,8 +7,14 @@ import java.util.List;
  */
 public class Node {
 	
+	/**
+	 * Position of the node in the map
+	 */
 	private Position nodePosition;
 	
+	/**
+	 * Previous nodes connected to this one.
+	 */
 	private List<Node> parents;
 	
 	/**
@@ -109,11 +115,26 @@ public class Node {
 		actualizeProbabilities();
 	}
 	
+	/**
+	 * Check if the current node is the final node of the map.
+	 */
 	public boolean isFinalNode(){
 		return children.isEmpty();
 	}
 	
+	/**
+	 * Check if the current node is the initial node of the map.
+	 */
 	public boolean isInitialNode(){
 		return parents.isEmpty();
+	}
+
+	/**
+	 * Leave pheromone on the specified path = increase its probability
+	 */
+	public void leavePheromone(Path selectedPath, double weight) {
+		double newProba = selectedPath.getProbability()+weight/selectedPath.getDistance();
+		selectedPath.setProbability(newProba);
+		reshapeProbabilities();
 	}
 }

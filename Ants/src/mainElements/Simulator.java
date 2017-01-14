@@ -19,7 +19,7 @@ public class Simulator extends Observable {
 	
 	private static int iterations;
 	
-	private static double p = 0.4; // TODO Check value
+	private static double p = 0.7; // TODO Check value
 	
 	private static List<Ant> colony = new ArrayList<>();
 	private static int numberOfAnts;
@@ -33,6 +33,8 @@ public class Simulator extends Observable {
 	private Set<Path> paths = new HashSet<>();
 	
 	ArrayList<Path> shortestPath = new ArrayList<Path>();
+	
+	private Ant currentAnt = null;
 	
 	public Simulator (){
 		super();
@@ -57,6 +59,9 @@ public class Simulator extends Observable {
 		}
 	}
 
+	/**
+	 * Modify the position of the start node
+	 */
 	public void modifyStartNode(int xPosition, int yPosition){
 		if(start != null){
 			otherNodes.remove(start);
@@ -68,6 +73,9 @@ public class Simulator extends Observable {
 		afterChangesMethod(start);
 	}
 	
+	/**
+	 * Delete all paths associated to the specified node
+	 */
 	private void removeAllAssociatedPaths(Node node) {
 		node.unlinkNode();
 		for(Path path : paths){
@@ -77,6 +85,9 @@ public class Simulator extends Observable {
 		}
 	}
 
+	/**
+	 * Modify the position of the end node
+	 */
 	public void modifyEndNode(int xPosition, int yPosition){
 		if(end != null){
 			otherNodes.remove(end);
@@ -87,6 +98,9 @@ public class Simulator extends Observable {
 		afterChangesMethod(end);
 	}
 	
+	/**
+	 * Create a node at the specified (x,y) position
+	 */
 	public void addNode(int xPosition, int yPosition){
 		Node newNode = new Node(xPosition, yPosition);
 		otherNodes.add(newNode);
@@ -99,6 +113,9 @@ public class Simulator extends Observable {
 	    notifyObservers(node);
 	}
 	
+	/**
+	 * Reset all data
+	 */
 	public void reset() {
 	    start = null;
 	    end = null;
@@ -111,21 +128,30 @@ public class Simulator extends Observable {
 
 	}
 	
+	/**
+	 * Create a path between two nodes specified by their (x,y) position
+	 */
 	public void linkNodes(int xParent, int yParent, int xChild, int yChild){
 		Node parent = findClosestNode(xParent, yParent, 1.5*radius);
 		Node child = findClosestNode(xChild, yChild, 1.5*radius);
 		linkNodes(parent, child);
 	}
 	
-	private void linkNodes(Node parent, Node child){
-		if(parent != null && child != null && !isExistingPath(parent, child)){
-			parent.addChild(child);
-			paths.add(parent.getAvailablePaths().get(parent.getAvailablePaths().size()-1));
+	/**
+	 * Create the path between the specified initial and final node
+	 */
+	private void linkNodes(Node initial, Node child){
+		if(initial != null && child != null && !isExistingPath(initial, child)){
+			initial.addChild(child);
+			paths.add(initial.getAvailablePaths().get(initial.getAvailablePaths().size()-1));
 		}
 		setChanged();
 	    notifyObservers();
 	}
 	
+	/**
+	 * Check if the path between the specified initial and final node is already existing
+	 */
 	private boolean isExistingPath(Node parent, Node child) {
 		for(Path path : paths){
 			if(path.getInitialNode() == parent && path.getFinalNode() == child){
@@ -135,6 +161,9 @@ public class Simulator extends Observable {
 		return false;
 	}
 
+	/**
+	 * Find the closest existing node to the specified position
+	 */
 	private Node findClosestNode(int x, int y, double radius) {
 		for(Node node : otherNodes){
 			if(Position.computeDistance(x,y,node.getXPosition(), node.getYPosition()) <= radius){
@@ -148,22 +177,19 @@ public class Simulator extends Observable {
 		for(int i = 0; i < iterations; i++){
 			System.out.println("Iteration : "+i);
 			// All ants making their way to the end node (target point)
-			HashSet<Ant> antsAtTarget = new HashSet<>();
-			while(antsAtTarget.size()!=colony.size()){
-				for(Ant ant : colony){
-					if(!ant.getCurrentNode().equals(end)){
-						Node currentNode = ant.getCurrentNode();
-						Path selectedPath = selectPathRandomly(currentNode.getAvailablePaths());
-						ant.setNodePosition(selectedPath.getFinalNode());
-						ant.addAVisitedPath(selectedPath);
-					} else {
-						antsAtTarget.add(ant);
-					}
+			for(Ant ant : colony){
+				while(!ant.getCurrentNode().equals(end)){
+					Node currentNode = ant.getCurrentNode();
+					Path selectedPath = selectPathRandomly(ant, currentNode.getAvailablePaths());
+					ant.setNodePosition(selectedPath.getFinalNode());
+					ant.addAVisitedPath(selectedPath);
+//					currentNode.leavePheromone(selectedPath,10.0);
 				}
 			}
 			
 			// Update pheromone
 			HashMap<Path, Double> pheromonePerPath = new HashMap<>();
+			// Find fastest ant : the one with the smallest traveled distance
 			double smallestDistance = Double.MAX_VALUE;
 			Ant fastestAnt = null;
 			for(Ant ant : colony){
@@ -182,11 +208,22 @@ public class Simulator extends Observable {
 			}
 			// Double update of pheromone on the path of the fastest ant
 			for(Path path : fastestAnt.getVisitedPaths()){
-				pheromonePerPath.put(path, pheromonePerPath.get(path)+1.0/smallestDistance);
+				pheromonePerPath.put(path, pheromonePerPath.get(path)+2.0/smallestDistance);
 			}
 			
 			updatePheromone(start, pheromonePerPath, new HashSet<>());
 			normalizeAllProba(start, new HashSet<Node>());
+			
+			// Visualize the traveled paths of each ant
+			for(Ant ant : colony){
+				printVisitedPaths(ant);
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					System.err.println("Something went wrong !");
+				}
+			}
 			
 			allAntsComingBackToColony();
 		}
@@ -212,6 +249,20 @@ public class Simulator extends Observable {
 	    notifyObservers();
 	}
 
+	/**
+	 * Set the specified ant to current one to visualize its traveled path on the graph.
+	 */
+	private void printVisitedPaths(Ant ant) {
+		currentAnt = ant;
+		setChanged();
+	    notifyObservers();
+	}
+
+	/**
+	 * Recursive function normalizing all path probabilities.
+	 * @param currentNode The current node from which the paths are normalized
+	 * @param alreadyVisitedNodes Peths already updated
+	 */
 	private static void normalizeAllProba(Node currentNode, HashSet<Node> alreadyVisitedNodes) {
 		if(!alreadyVisitedNodes.contains(currentNode)){
 			currentNode.reshapeProbabilities();
@@ -222,13 +273,21 @@ public class Simulator extends Observable {
 		}
 	}
 
+	/**
+	 * Reset data on traveled paths for each ant
+	 */
 	private void allAntsComingBackToColony() {
 		for(Ant ant : colony){
 			ant.backToColony(start);
 		}
 	}
-
-	private static void updatePheromone(Node currentNode, HashMap<Path, Double> pheromonePerPath, HashSet<Path> alreadyVisited) {
+	/**
+	 * Recursive function updating all path probabilities
+	 * @param currentNode The paths having this node as initial node are updated
+	 * @param pheromonePerPath Map giving the updated probability value of each path
+	 * @param alreadyVisited Paths already updated
+	 */
+	private void updatePheromone(Node currentNode, HashMap<Path, Double> pheromonePerPath, HashSet<Path> alreadyVisited) {
 		for(Path path : currentNode.getAvailablePaths()){
 			if(!alreadyVisited.contains(path)){
 				double proba;
@@ -243,27 +302,43 @@ public class Simulator extends Observable {
 			}
 		}
 	}
-
-	private static Path selectPathRandomly(List<Path> availablePaths) {
+	
+	/**
+	 * Select randomly the next path taken by the specified ant, among the possible paths.
+	 */
+	private static Path selectPathRandomly(Ant ant, List<Path> availablePaths) {
 		Random random = new Random();
-		double randomNumber = random.nextDouble();
-		double counter = 0.0;
-		for(Path path : availablePaths){
-			counter += path.getProbability();
-			if(randomNumber < counter){
-				return path;
+		int cpt = 10; // To avoid infinite loop
+		while(cpt>0){
+			double randomNumber = random.nextDouble();
+			double counter = 0.0;
+			for(Path path : availablePaths){
+				counter += path.getProbability();
+				if(randomNumber < counter){
+					if(!ant.getVisitedPaths().contains(path)){
+						// Select this path if it hasn't been already chosen by the ant
+						return path;
+					} else {
+						break; // Compute randomly another path
+					}
+				}
 			}
 		}
-		return null;
+		return availablePaths.get(0);
 	}
 
+	/**
+	 * Print elements on graphic
+	 */
 	public void print(Graphics gc) {
 		// Print start node if any
 		gc.setColor(Color.RED);
 		printNode(gc, start);
+		
 		// Print end node if any
 		gc.setColor(Color.BLUE);
 		printNode(gc, end);
+		
 		// Print other nodes if any
 		gc.setColor(Color.BLACK);
 		for(Node node : otherNodes){
@@ -271,19 +346,30 @@ public class Simulator extends Observable {
 				printNode(gc, node);
 			}
 		}
+		
 		// Print links between nodes if any
 		printLinks(gc);
 	}
 
 	private void printLinks(Graphics gc) {
+		gc.setColor(Color.BLACK);
 		for(Path path : paths){
 			Node i = path.getInitialNode();
 			Node f = path.getFinalNode();
-//			gc.drawLine(adaptPosition(i.getXPosition()), adaptPosition(i.getYPosition()), adaptPosition(f.getXPosition()), adaptPosition(f.getYPosition()));
+			
 			gc.drawLine(i.getXPosition(), i.getYPosition(), f.getXPosition(), f.getYPosition());
 		}
 		
-		if(!shortestPath.isEmpty()){
+		if(currentAnt != null) {
+			gc.setColor(Color.CYAN);
+			for(Path visitedPath : currentAnt.getVisitedPaths()){
+				Node i = visitedPath.getInitialNode();
+				Node f = visitedPath.getFinalNode();
+				gc.drawLine(i.getXPosition(), i.getYPosition(), f.getXPosition(), f.getYPosition());
+			}
+		}
+		
+		if(!shortestPath.isEmpty()) {
 			gc.setColor(Color.MAGENTA);
 			for(Path path : shortestPath){
 				Node i = path.getInitialNode();
@@ -292,14 +378,14 @@ public class Simulator extends Observable {
 			}
 		}
 	}
-
+	
 	private void printNode(Graphics gc, Node node) {
 		if(node != null){
 			gc.fillOval(adaptPosition(node.getXPosition()), adaptPosition(node.getYPosition()), radius, radius);
 		}
 	}
 	
-	private int adaptPosition(int position){
+	private int adaptPosition(int position) {
 		return Math.max(0, position-(Simulator.radius/2));
 	}
 

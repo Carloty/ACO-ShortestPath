@@ -10,6 +10,7 @@ import java.awt.event.*;
 /**
  * Panel to configure ACO settings
  */
+@SuppressWarnings("serial")
 public class Controle extends JPanel {
 	private static final int suggestedNumberOfAnts = 100;
 	private static final int suggestedNumberOfIterations = 1000;
