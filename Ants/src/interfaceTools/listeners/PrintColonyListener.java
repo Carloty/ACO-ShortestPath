@@ -1,17 +1,17 @@
-package interfaceTools;
+package interfaceTools.listeners;
 
 import java.awt.event.*;
 import mainElements.Simulator;
 
-public class PrintPathNodeListener extends PrintListener {
+public class PrintColonyListener extends PrintListener {
 	  
-	public PrintPathNodeListener(Simulator dessinables) {
+	public PrintColonyListener(Simulator dessinables) {
 		super(dessinables);
 	}
 	  
 	public void mouseClicked(MouseEvent e){
 		int x = adaptPosition(e.getX());
 		int y = adaptPosition(e.getY());
-		data.addNode(x, y);
+		data.modifyStartNode(x, y);	
 	} 
 }

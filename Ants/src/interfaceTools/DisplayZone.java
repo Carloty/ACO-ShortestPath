@@ -7,6 +7,9 @@ import mainElements.Simulator;
 import java.awt.*;
 import java.util.*;
 
+/**
+ * Area where nodes and paths are displayed.
+ */
 @SuppressWarnings("serial")
 public class DisplayZone extends JPanel implements Observer {
 	private static final int xSize = 1000;
@@ -14,25 +17,25 @@ public class DisplayZone extends JPanel implements Observer {
 	
 	private Simulator simulator;
   
-  public DisplayZone() {
-    super();
+	public DisplayZone() {
+		super();
     
-    setOpaque(true);
-    setBackground(Color.white);
-    setPreferredSize(new Dimension(xSize,ySize));
-  }
+		setOpaque(true);
+		setBackground(Color.white);
+		setPreferredSize(new Dimension(xSize,ySize));
+	}
   
-  public void setModel(Simulator printables) {
-	simulator = printables;
-  	printables.addObserver(this);
-  }
+	public void setModel(Simulator printables) {
+		simulator = printables;
+		printables.addObserver(this);
+	}
 
-  public void update(Observable obs, Object o) {
-  	this.paintComponent(this.getGraphics());
-  }
+	public void update(Observable obs, Object o) {
+		this.paintComponent(this.getGraphics());
+	}
 
-  public void paintComponent(Graphics gc) {
-  	super.paintComponent(gc);
-  	simulator.print(gc);
-  }
+	public void paintComponent(Graphics gc) {
+		super.paintComponent(gc);
+		simulator.print(gc);
+	}
 }

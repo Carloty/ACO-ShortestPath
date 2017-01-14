@@ -10,9 +10,9 @@ import java.util.Observable;
 import java.util.Random;
 import java.util.Set;
 
-import map.Node;
-import map.Path;
-import map.Position;
+import mapData.Node;
+import mapData.Path;
+import mapData.Position;
 
 public class Simulator extends Observable {
 	public static int radius = 12; // TODO check value
@@ -36,8 +36,14 @@ public class Simulator extends Observable {
 	
 	private Ant currentAnt = null;
 	
+	private int currentIteration = -1;
+	
 	public Simulator (){
 		super();
+	}
+	
+	public int getCurrentIteration(){
+		return currentIteration;
 	}
 	
 	public void setNbOfIterations(int nb){
@@ -176,6 +182,7 @@ public class Simulator extends Observable {
 	public void launch() {
 		for(int i = 0; i < iterations; i++){
 			System.out.println("Iteration : "+i);
+			currentIteration = i;
 			// All ants making their way to the end node (target point)
 			for(Ant ant : colony){
 				while(!ant.getCurrentNode().equals(end)){
@@ -331,6 +338,9 @@ public class Simulator extends Observable {
 	 * Print elements on graphic
 	 */
 	public void print(Graphics gc) {
+		// Print number of the current iteration
+		gc.drawString("Itération courante = "+(currentIteration+1), 5, 15);
+		
 		// Print start node if any
 		gc.setColor(Color.RED);
 		printNode(gc, start);
@@ -376,6 +386,7 @@ public class Simulator extends Observable {
 				Node f = path.getFinalNode();
 				gc.drawLine(i.getXPosition(), i.getYPosition(), f.getXPosition(), f.getYPosition());
 			}
+			gc.drawString("Probabilité du plus court chemin trouvé : "+shortestPath.get(0).getProbability(), 5, 30);
 		}
 	}
 	

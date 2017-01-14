@@ -1,4 +1,4 @@
-package map;
+package mapData;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +88,9 @@ public class Node {
 		actualizeProbabilities();
 	}
 	
+	/**
+	 * Set all path probability at the same value
+	 */
 	private void actualizeProbabilities() {
 		double proba = 1.0/children.size();
 		for(Path path : children){
@@ -95,6 +98,9 @@ public class Node {
 		}
 	}
 	
+	/**
+	 * Make sure that the sum of all path probability is 1
+	 */
 	public void reshapeProbabilities(){
 		double total = 0.0;
 		for(Path path : children){

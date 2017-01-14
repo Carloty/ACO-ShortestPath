@@ -2,8 +2,8 @@ package mainElements;
 import java.util.ArrayList;
 import java.util.List;
 
-import map.Node;
-import map.Path;
+import mapData.Node;
+import mapData.Path;
 
 /**
  * Class representing an Ant.
@@ -69,7 +69,7 @@ public class Ant {
 	}
 	
 	/**
-	 * Get the distance travaled by the ant.
+	 * Get the distance traveled by the ant.
 	 */
 	public double getTraveledDistance(){
 		double distance = 0.0;

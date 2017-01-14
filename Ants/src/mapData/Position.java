@@ -1,5 +1,8 @@
-package map;
+package mapData;
 
+/**
+ * Point on the map
+ */
 public class Position {
 	
 	private int x;

@@ -2,6 +2,10 @@ package interfaceTools;
 
 import javax.swing.*;
 
+import interfaceTools.listeners.PrintColonyListener;
+import interfaceTools.listeners.PrintFoodListener;
+import interfaceTools.listeners.PrintPathListener;
+import interfaceTools.listeners.PrintPathNodeListener;
 import mainElements.Simulator;
 
 import java.awt.*;

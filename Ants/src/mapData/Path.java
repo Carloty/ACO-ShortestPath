@@ -1,11 +1,21 @@
-package map;
+package mapData;
+
+/**
+ * Path between two nodes.
+ */
 public class Path {
 	private Node initialNode;
 	
 	private Node finalNode;
 	
+	/**
+	 * Path size
+	 */
 	private double distance;
 	
+	/**
+	 * Path probability
+	 */
 	private double probability;
 	
 	public Path(Node start, Node end, double pathDistance, double proba){
